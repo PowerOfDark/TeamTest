@@ -8,6 +8,7 @@ using System.Threading;
 using ProcessLib;
 using TeamTest.Adapters;
 using Win32Lib;
+using TeamTest.OI2017;
 
 namespace TeamTest
 {
@@ -27,6 +28,9 @@ namespace TeamTest
         public static ITest JOB;
         public static Queue<TestInfo> QueuedTests = new Queue<TestInfo>();
 
+        public static AutoResetEvent GenHandle = new AutoResetEvent(false);
+        public static AutoResetEvent WorkerHandle = new AutoResetEvent(false);
+
         public static int Tests_OK;
         public static int Tests_BAD;
 
@@ -45,7 +49,7 @@ namespace TeamTest
             }
             var exes = dir.EnumerateFiles("*.exe");
             var exestr = string.Join(", ", exes.Select(t => t.Name));
-            if (exes.Count() > 0)
+            if (exes.Any())
             {
                 CHOOSE_MASTER:
                 ;
@@ -76,8 +80,7 @@ namespace TeamTest
             }
             Directory.CreateDirectory(OutputDir);
 
-            StartJob(new STE(new IntRangeValue(30, 50), new IntRangeValue(30, 50), new IntRangeValue(50, 90), new IntRangeValue(50, 90),
-                new ConstantValue<int>(4)));
+            StartJob(new PIO(new IntRangeValue(-100, 100), new IntRangeValue(-100, 100), new IntRangeValue(1000, 20000)));
 
             string s;
             while ((s = Console.ReadLine()) != "stop")
@@ -85,6 +88,7 @@ namespace TeamTest
             }
             _runGeneratorThread = false;
             _runTesterThread = false;
+            TesterThread.Join();
         }
 
         public static void StartJob(ITest job)
@@ -92,7 +96,7 @@ namespace TeamTest
             JOB = job;
             JobName = job.JobName;
             Console.WriteLine($"-----------BEGIN JOB {JobName}----------");
-            GeneratorThread = new Thread(() => { GenerateTests(5); });
+            GeneratorThread = new Thread(() => { GenerateTests(10); });
             TesterThread = new Thread(() => { TestWorker(); });
             //new Thread(() => { TestWorker(); }).Start();
             //new Thread(() => { TestWorker(); }).Start();
@@ -115,6 +119,7 @@ namespace TeamTest
                         test = QueuedTests.Dequeue();
                     }
                 }
+                GenHandle.Set();
                 if (test != null)
                 {
                     ok = SingleTest(test);
@@ -136,7 +141,7 @@ namespace TeamTest
                 }
                 else
                 {
-                    Thread.Sleep(10);
+                    WorkerHandle.WaitOne();
                 }
             }
         }
@@ -159,11 +164,12 @@ namespace TeamTest
                     {
                         QueuedTests.Enqueue(test);
                     }
+                    WorkerHandle.Set();
                     Interlocked.Increment(ref CurrentTestID);
                 }
                 else
                 {
-                    Thread.Sleep(10);
+                    GenHandle.WaitOne();
                 }
             }
         }
@@ -192,7 +198,7 @@ namespace TeamTest
                 var p = processes[i];
                 var e = Executables[i];
                 p.WaitForExit();
-                Thread.Sleep(10);
+                Thread.Sleep(5);
                 processes[i].StartInfo.StdIO.StandardOutput.Close();
                 processes[i].StartInfo.StdIO.StandardInput.Close();
 
@@ -263,7 +269,8 @@ namespace TeamTest
                 {
                     File.Delete(targetTest);
                 }
-                File.Move(Path.Combine(testOutputDir, $"{MasterMD5}.out"), targetTest);
+                File.Delete(Path.Combine(testOutputDir, $"{MasterMD5}.out"));
+                //File.Move(Path.Combine(testOutputDir, $"{MasterMD5}.out"), targetTest);
                 Directory.Delete(testOutputDir, true);
             }
             else
@@ -274,6 +281,7 @@ namespace TeamTest
                 ++Mismatches;
                 Console.ResetColor();
                 var md5s = OutputMd5s.Keys.OrderBy(t => OutputMd5s[t].Count);
+                File.Copy(testPath, Path.Combine(testOutputDir, $"{currentTestName}.in"), true);
                 foreach (var key in md5s)
                 {
                     var list = OutputMd5s[key];
@@ -326,7 +334,7 @@ namespace TeamTest
             {
                 using (var stream = File.Open(_tmp, FileMode.Open, FileAccess.Read, FileShare.Delete | FileShare.ReadWrite))
                 {
-                    if (JobName == "fla")
+                    if (JobName == "pio")
                     {
                         var c = new byte[256];
                         var read = stream.Read(c, 0, 256);
