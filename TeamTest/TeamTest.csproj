@@ -50,10 +50,12 @@
     <Compile Include="OI2016\FLA.cs" />
     <Compile Include="ITest.cs" />
     <Compile Include="OI2016\POD.cs" />
+    <Compile Include="OI2017\PIO.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="OI2016\REP.cs" />
     <Compile Include="RNG.cs" />
+    <Compile Include="SKI\SKI.cs" />
     <Compile Include="SKI\STE.cs" />
 	<Compile Include="OI2017\PIO.cs" />
   </ItemGroup>
