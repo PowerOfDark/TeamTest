@@ -57,7 +57,7 @@
     <Compile Include="RNG.cs" />
     <Compile Include="SKI\SKI.cs" />
     <Compile Include="SKI\STE.cs" />
-	<Compile Include="OI2017\PIO.cs" />
+	<Compile Include="SKI\WIC.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
