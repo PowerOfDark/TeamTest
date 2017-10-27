@@ -58,6 +58,7 @@
     <Compile Include="SKI\SKI.cs" />
     <Compile Include="SKI\STE.cs" />
     <Compile Include="SKI\WIC.cs" />
+    <Compile Include="SKI\KOL.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
