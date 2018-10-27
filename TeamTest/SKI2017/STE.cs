@@ -2,7 +2,7 @@
 using System.IO;
 using TeamTest.Adapters;
 
-namespace TeamTest
+namespace TeamTest.SKI2017
 {
     public class STE : ITest
     {
