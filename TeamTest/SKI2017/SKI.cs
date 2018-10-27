@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TeamTest.Adapters;
 
-namespace TeamTest.OI2017
+namespace TeamTest.SKI2017
 {
     public class SKI : ITest
     {
