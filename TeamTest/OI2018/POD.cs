@@ -34,7 +34,8 @@ namespace TeamTest.OI2018
             using (var sw = new StreamWriter(path, false))
             {
                 var q = Q.Get(r);
-                for(int i = 0; i < q; i++)
+                sw.WriteLine($"{Q.Get(r)}");
+                for (int i = 0; i < q; i++)
                 {
                     sw.WriteLine($"{N.Get(r)}");
                 }
