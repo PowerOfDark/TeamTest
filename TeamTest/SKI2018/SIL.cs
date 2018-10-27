@@ -37,7 +37,7 @@ namespace TeamTest.SKI2018
                 var r = new Random(id);
                 var a = A.Get(r);
                 var b = B.Get(r);
-                var c = B.Get(r);
+                var c = C.Get(r);
 
                 sw.WriteLine($"{a} {b} {c}");
             }
